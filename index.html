@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Student Finance Tracker — manage expenses, track budgets, and analyse spending trends.">
+  <title>Student Finance Tracker</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+  <!-- Skip link for keyboard / screen-reader users -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header role="banner">
+    <div class="header-inner">
+      <h1>Student <em>Finance</em> Tracker</h1>
+      <nav aria-label="Primary navigation">
+        <ul role="list">
+          <li><a href="#dashboard">Dashboard</a></li>
+          <li><a href="#records">Records</a></li>
+          <li><a href="#form">Add / Edit</a></li>
+          <li><a href="#settings">Settings</a></li>
+          <li><a href="#about" aria-current="page">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ═══ ABOUT ═══════════════════════════════════════════ -->
+    <section id="about" aria-labelledby="about-heading">
+      <h2 id="about-heading" class="section-title">About</h2>
+
+      <p class="about-lead">A finance companion built for students who care about where their money goes.</p>
+
+      <p>
+        <strong>Student Finance Tracker</strong> lets you log expenses, set a budget cap, search
+        records with live regex, and see 7-day spending trends at a glance. All data is stored
+        locally in your browser — nothing leaves your device.
+      </p>
+      <p>
+        Created by <strong>Gabriel Mugisha</strong>
+        (<a href="https://github.com/GabbyIT-pixel" target="_blank" rel="noopener">GabbyIT-pixel</a>).
+        Built with vanilla HTML, CSS &amp; JavaScript — no frameworks.
+      </p>
+      <p>
+        Features: semantic layout · responsive design (360 / 768 / 1024 px) · regex validation
+        (incl. back-reference &amp; lookahead) · live regex search with highlights · localStorage
+        persistence · JSON import / export · currency conversion · keyboard navigation · ARIA live regions.
+      </p>
+
+      <!-- Keyboard shortcuts table -->
+      <h3 style="margin-top:1.5rem;margin-bottom:.5rem;font-family:var(--font-head)">Keyboard Shortcuts</h3>
+      <table class="kbd-table">
+        <thead>
+          <tr><th scope="col">Shortcut</th><th scope="col">Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><kbd>Alt</kbd> + <kbd>1</kbd></td><td>Go to Dashboard</td></tr>
+          <tr><td><kbd>Alt</kbd> + <kbd>2</kbd></td><td>Go to Records</td></tr>
+          <tr><td><kbd>Alt</kbd> + <kbd>3</kbd></td><td>Go to Add / Edit form</td></tr>
+          <tr><td><kbd>Alt</kbd> + <kbd>4</kbd></td><td>Go to Settings</td></tr>
+          <tr><td><kbd>Alt</kbd> + <kbd>5</kbd></td><td>Go to About</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Regex catalogue -->
+      <div class="regex-examples">
+        <h3>Regex Catalogue</h3>
+        <table class="regex-table">
+          <thead>
+            <tr>
+              <th scope="col">Pattern</th>
+              <th scope="col">Purpose</th>
+              <th scope="col">Example match</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>/^\S(?:.*\S)?$/</code></td>
+              <td>Description — no leading/trailing spaces</td>
+              <td>"Lunch at cafeteria" ✓ &nbsp; " bad " ✗</td>
+            </tr>
+            <tr>
+              <td><code>/^(0|[1-9]\d*)(\.\d{1,2})?$/</code></td>
+              <td>Amount — non-negative, max 2 d.p.</td>
+              <td>9.99 ✓ &nbsp; 1.234 ✗</td>
+            </tr>
+            <tr>
+              <td><code>/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/</code></td>
+              <td>Date — strict YYYY-MM-DD</td>
+              <td>2026-02-10 ✓ &nbsp; 2026-13-01 ✗</td>
+            </tr>
+            <tr>
+              <td><code>/^[A-Za-z]+(?:[ -][A-Za-z]+)*$/</code></td>
+              <td>Category — letters, spaces, hyphens</td>
+              <td>Bus-Fare ✓ &nbsp; 123cat ✗</td>
+            </tr>
+            <tr>
+              <td><code>/\b(\w+)\s+\1\b/i</code></td>
+              <td><strong>Advanced</strong> — back-reference, duplicate word</td>
+              <td>"tea tea" ✓ matches &nbsp; "bus fare" ✗</td>
+            </tr>
+            <tr>
+              <td><code>/^(?!0(\.0{1,2})?$)(0|[1-9]\d*)(\.\d{1,2})?$/</code></td>
+              <td><strong>Advanced</strong> — lookahead, amount &gt; 0</td>
+              <td>0.01 ✓ &nbsp; 0.00 ✗</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══ DASHBOARD ════════════════════════════════════════ -->
+    <section id="dashboard" aria-labelledby="dashboard-heading">
+      <!-- Rendered dynamically by ui.renderDashboard() -->
+      <h2 id="dashboard-heading" class="section-title" style="display:none">Dashboard</h2>
+    </section>
+
+    <!-- ═══ RECORDS ══════════════════════════════════════════ -->
+    <section id="records" aria-labelledby="records-heading">
+      <h2 id="records-heading" class="section-title">Records</h2>
+
+      <div class="records-controls">
+        <label for="sortSelect">Sort by:</label>
+        <select id="sortSelect" name="sortSelect" aria-label="Sort records">
+          <option value="date">Date (oldest first)</option>
+          <option value="date-desc">Date (newest first)</option>
+          <option value="description">Description (A–Z)</option>
+          <option value="amount">Amount (low–high)</option>
+          <option value="amount-desc">Amount (high–low)</option>
+          <option value="category">Category (A–Z)</option>
+        </select>
+
+        <label for="regexSearchInput" class="sr-only">Regex search</label>
+        <input
+          type="search"
+          id="regexSearchInput"
+          name="regexSearchInput"
+          placeholder="Regex search… e.g. /(coffee|tea)/i"
+          aria-label="Search records using a regex pattern"
+          autocomplete="off"
+        >
+        <span id="searchFeedback" aria-live="polite" aria-atomic="true"></span>
+      </div>
+
+      <div id="records-list" aria-live="polite" aria-label="Records list">
+        <!-- Rendered dynamically by ui.renderRecords() -->
+      </div>
+    </section>
+
+    <!-- ═══ FORM ══════════════════════════════════════════════ -->
+    <section id="form" aria-labelledby="form-heading">
+      <h2 id="form-heading" class="section-title">
+        <span id="formTitle">Add Record</span>
+      </h2>
+
+      <form id="recordForm" novalidate aria-describedby="formError">
+        <div class="form-grid">
+
+          <div class="field-wrap field-wrap--full">
+            <label for="desc">Description</label>
+            <input
+              type="text"
+              id="desc"
+              name="desc"
+              placeholder="e.g. Lunch at cafeteria"
+              autocomplete="off"
+              aria-required="true"
+              aria-describedby="err-desc"
+            >
+            <span class="field-error" id="err-desc" role="alert" aria-live="polite"></span>
+          </div>
+
+          <div class="field-wrap">
+            <label for="amount">Amount (USD)</label>
+            <input
+              type="number"
+              id="amount"
+              name="amount"
+              step="0.01"
+              min="0.01"
+              placeholder="e.g. 12.50"
+              aria-required="true"
+              aria-describedby="err-amount"
+            >
+            <span class="field-error" id="err-amount" role="alert" aria-live="polite"></span>
+          </div>
+
+          <div class="field-wrap">
+            <label for="category">Category</label>
+            <input
+              type="text"
+              id="category"
+              name="category"
+              list="category-suggestions"
+              placeholder="e.g. Food"
+              aria-required="true"
+              aria-describedby="err-category"
+            >
+            <datalist id="category-suggestions">
+              <option value="Food">
+              <option value="Books">
+              <option value="Transport">
+              <option value="Entertainment">
+              <option value="Fees">
+              <option value="Other">
+            </datalist>
+            <span class="field-error" id="err-category" role="alert" aria-live="polite"></span>
+          </div>
+
+          <div class="field-wrap">
+            <label for="date">Date</label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              aria-required="true"
+              aria-describedby="err-date"
+            >
+            <span class="field-error" id="err-date" role="alert" aria-live="polite"></span>
+          </div>
+
+        </div><!-- /form-grid -->
+
+        <div style="display:flex;gap:.75rem;margin-top:1.25rem;flex-wrap:wrap;">
+          <button type="submit" class="btn btn--primary">Save Record</button>
+          <button type="button" id="cancelEditBtn" class="btn btn--ghost">Cancel Edit</button>
+        </div>
+
+        <div id="formError" class="form-status" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <!-- ═══ SETTINGS ═════════════════════════════════════════ -->
+    <section id="settings" aria-labelledby="settings-heading">
+      <h2 id="settings-heading" class="section-title">Settings</h2>
+
+      <div class="settings-grid">
+
+        <!-- Export / Import -->
+        <div class="settings-block">
+          <h3>Data</h3>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <button id="exportBtn" class="btn btn--ghost">⬇ Export JSON</button>
+          </div>
+          <div class="field-wrap">
+            <label for="importFile">Import JSON</label>
+            <input type="file" id="importFile" accept=".json" aria-describedby="importMsg">
+          </div>
+          <p class="settings-msg" id="importMsg" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- Budget Cap -->
+        <div class="settings-block">
+          <h3>Budget Cap</h3>
+          <div class="settings-row">
+            <div class="field-wrap">
+              <label for="capInput">Monthly cap (USD)</label>
+              <input type="number" id="capInput" min="1" step="1" aria-describedby="capMsg">
+            </div>
+            <button id="saveCapBtn" class="btn btn--primary">Save</button>
+          </div>
+          <p class="settings-msg" id="capMsg" role="status" aria-live="polite"></p>
+        </div>
+
+        <!-- Currency Rates -->
+        <div class="settings-block">
+          <h3>Currency Rates (from USD)</h3>
+          <div class="settings-row">
+            <div class="field-wrap">
+              <label for="eurRate">EUR rate</label>
+              <input type="number" id="eurRate" step="0.0001" min="0.0001" placeholder="e.g. 0.92" aria-describedby="rateMsg">
+            </div>
+            <div class="field-wrap">
+              <label for="gbpRate">GBP rate</label>
+              <input type="number" id="gbpRate" step="0.0001" min="0.0001" placeholder="e.g. 0.79" aria-describedby="rateMsg">
+            </div>
+            <div class="field-wrap">
+              <label for="rwfRate">RWF rate <span style="font-size:.75rem;color:#64748b">(Rwandan Franc)</span></label>
+              <input type="number" id="rwfRate" step="1" min="1" placeholder="e.g. 1460" aria-describedby="rateMsg">
+            </div>
+            <button id="saveRatesBtn" class="btn btn--primary">Save Rates</button>
+          </div>
+          <div class="settings-row" style="margin-top:1rem">
+            <label for="currencySelect">Display currency</label>
+            <select id="currencySelect" aria-label="Choose display currency">
+              <option value="USD">USD ($) — US Dollar</option>
+              <option value="EUR">EUR (€) — Euro</option>
+              <option value="GBP">GBP (£) — British Pound</option>
+              <option value="RWF">RWF — Rwandan Franc</option>
+            </select>
+          </div>
+          <p class="settings-msg" id="rateMsg" role="status" aria-live="polite"></p>
+        </div>
+
+      </div><!-- /settings-grid -->
+    </section>
+
+  </main>
+
+  <footer role="contentinfo">
+    <div class="footer-top">
+      <div class="footer-inner">
+
+        <div class="footer-brand">
+          <span class="footer-logo">Finance<em>Tracker</em></span>
+          <p class="footer-tagline">Your student budget, beautifully in control.</p>
+          <p class="footer-built">Built with vanilla HTML · CSS · JavaScript</p>
+        </div>
+
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <h3>Navigate</h3>
+          <ul>
+            <li><a href="#dashboard">Dashboard</a></li>
+            <li><a href="#records">Records</a></li>
+            <li><a href="#form">Add Record</a></li>
+            <li><a href="#settings">Settings</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </nav>
+
+        <div class="footer-features">
+          <h3>Features</h3>
+          <ul>
+            <li>✓ Regex-powered search</li>
+            <li>✓ localStorage persistence</li>
+            <li>✓ Currency conversion</li>
+            <li>✓ JSON import / export</li>
+            <li>✓ Keyboard accessible</li>
+          </ul>
+        </div>
+
+        <div class="footer-author">
+          <h3>Creator</h3>
+          <p class="footer-name">Gabriel Mugisha</p>
+          <div class="footer-links">
+            <a href="https://github.com/GabbyIT-pixel" target="_blank" rel="noopener noreferrer"
+               class="footer-link-btn" aria-label="GitHub profile of GabbyIT-pixel">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+              </svg>
+              GitHub
+            </a>
+            <a href="tests.html" class="footer-link-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+              </svg>
+              Run Tests
+            </a>
+          </div>
+          <p class="footer-stack">No frameworks &middot; No servers &middot; No sign-up</p>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <p>&copy; 2026 Gabriel Mugisha. Student Finance Tracker.</p>
+        <p class="footer-bottom-right">
+          <span class="footer-kbd" aria-label="Keyboard shortcuts: Alt 1 through 5">Alt+1–5 to navigate</span>
+          &middot;
+          <a href="#main" class="footer-totop">Back to top ↑</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Visually hidden helper class (used by search label) -->
+  <style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}</style>
+
+  <script type="module" src="scripts/app.js"></script>
+</body>
+</html>

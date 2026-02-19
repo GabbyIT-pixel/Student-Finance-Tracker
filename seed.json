@@ -1,0 +1,110 @@
+[
+  {
+    "id": "rec_seed_01",
+    "description": "Lunch at cafeteria",
+    "amount": 12.50,
+    "category": "Food",
+    "date": "2026-02-10",
+    "createdAt": "2026-02-10T12:00:00Z",
+    "updatedAt": "2026-02-10T12:00:00Z"
+  },
+  {
+    "id": "rec_seed_02",
+    "description": "Bus fare weekly pass",
+    "amount": 18.00,
+    "category": "Transport",
+    "date": "2026-02-11",
+    "createdAt": "2026-02-11T08:00:00Z",
+    "updatedAt": "2026-02-11T08:00:00Z"
+  },
+  {
+    "id": "rec_seed_03",
+    "description": "Chemistry textbook",
+    "amount": 89.99,
+    "category": "Books",
+    "date": "2026-01-15",
+    "createdAt": "2026-01-15T09:00:00Z",
+    "updatedAt": "2026-01-15T09:00:00Z"
+  },
+  {
+    "id": "rec_seed_04",
+    "description": "Coffee with friends",
+    "amount": 8.75,
+    "category": "Entertainment",
+    "date": "2026-02-14",
+    "createdAt": "2026-02-14T15:30:00Z",
+    "updatedAt": "2026-02-14T15:30:00Z"
+  },
+  {
+    "id": "rec_seed_05",
+    "description": "Tuition fee semester",
+    "amount": 9999.99,
+    "category": "Fees",
+    "date": "2025-12-31",
+    "createdAt": "2025-12-31T10:00:00Z",
+    "updatedAt": "2025-12-31T10:00:00Z"
+  },
+  {
+    "id": "rec_seed_06",
+    "description": "Library fine",
+    "amount": 0.50,
+    "category": "Fees",
+    "date": "2026-02-01",
+    "createdAt": "2026-02-01T11:00:00Z",
+    "updatedAt": "2026-02-01T11:00:00Z"
+  },
+  {
+    "id": "rec_seed_07",
+    "description": "Notebook and pens",
+    "amount": 6.99,
+    "category": "Books",
+    "date": "2026-02-03",
+    "createdAt": "2026-02-03T13:00:00Z",
+    "updatedAt": "2026-02-03T13:00:00Z"
+  },
+  {
+    "id": "rec_seed_08",
+    "description": "Movie night ticket",
+    "amount": 14.00,
+    "category": "Entertainment",
+    "date": "2026-02-07",
+    "createdAt": "2026-02-07T19:00:00Z",
+    "updatedAt": "2026-02-07T19:00:00Z"
+  },
+  {
+    "id": "rec_seed_09",
+    "description": "Grocery shopping",
+    "amount": 47.30,
+    "category": "Food",
+    "date": "2026-02-15",
+    "createdAt": "2026-02-15T17:00:00Z",
+    "updatedAt": "2026-02-15T17:00:00Z"
+  },
+  {
+    "id": "rec_seed_10",
+    "description": "Printing lecture notes",
+    "amount": 3.20,
+    "category": "Other",
+    "date": "2026-02-17",
+    "createdAt": "2026-02-17T10:30:00Z",
+    "updatedAt": "2026-02-17T10:30:00Z"
+  },
+  {
+    "id": "rec_seed_11",
+    "description": "Gym membership",
+    "amount": 25.00,
+    "category": "Other",
+    "date": "2026-02-18",
+    "createdAt": "2026-02-18T08:00:00Z",
+    "updatedAt": "2026-02-18T08:00:00Z"
+  },
+  {
+    "id": "rec_seed_12",
+    "description": "Taxi to airport",
+    "amount": 0.01,
+    "category": "Transport",
+    "date": "2026-02-19",
+    "createdAt": "2026-02-19T06:00:00Z",
+    "updatedAt": "2026-02-19T06:00:00Z"
+  }
+]

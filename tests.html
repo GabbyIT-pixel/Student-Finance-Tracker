@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tests — Student Finance Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;700&display=swap');
+    :root {
+      --pass: #2a7c5a; --fail: #c94f2a; --skip: #8a7968;
+      --bg: #f5f0e8; --surface: #ede7d9; --ink: #1a1410;
+      --font-head: 'DM Serif Display', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--bg); color: var(--ink); padding: 2rem 1rem 4rem; }
+    h1 { font-family: var(--font-head); font-size: 2rem; margin-bottom: .25rem; }
+    .subtitle { color: var(--skip); margin-bottom: 2rem; }
+    .summary {
+      display: inline-flex; gap: 2rem; background: var(--surface);
+      border-radius: 8px; padding: .75rem 1.5rem; margin-bottom: 2rem;
+      font-weight: 700; font-size: .95rem;
+    }
+    .pass-count { color: var(--pass); }
+    .fail-count { color: var(--fail); }
+    .suite { margin-bottom: 2rem; }
+    .suite-title {
+      font-family: var(--font-head); font-size: 1.3rem;
+      border-bottom: 2px solid var(--surface); padding-bottom: .4rem; margin-bottom: .75rem;
+    }
+    .test {
+      display: flex; align-items: baseline; gap: .75rem;
+      padding: .45rem .75rem; border-radius: 6px; margin-bottom: .3rem;
+      font-size: .88rem;
+    }
+    .test--pass { background: #e8f5ef; }
+    .test--fail { background: #fef0ec; }
+    .icon  { font-size: 1rem; flex-shrink: 0; }
+    .label { flex: 1; }
+    .value { font-family: monospace; font-size: .82rem; color: var(--skip); }
+    .fail-detail { color: var(--fail); font-size: .8rem; }
+  </style>
+</head>
+<body>
+
+<h1>Test Suite</h1>
+<p class="subtitle">Student Finance Tracker — Regex &amp; Validation Tests</p>
+
+<div class="summary">
+  <span class="pass-count" id="passCount">⏳ running…</span>
+  <span class="fail-count" id="failCount"></span>
+</div>
+
+<div id="output"></div>
+
+<script type="module">
+  import { patterns, validate, errorMessage } from './scripts/validators.js';
+  import { compileRegex, highlight }          from './scripts/search.js';
+
+  /* ── tiny test runner ─────────────────────────────────── */
+  const results = [];
+  let currentSuite = null;
+
+  function suite(name) {
+    currentSuite = { name, tests: [] };
+    results.push(currentSuite);
+  }
+
+  function assert(label, actual, expected) {
+    const pass = actual === expected;
+    currentSuite.tests.push({ label, actual, expected, pass });
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 1 — description pattern
+  ════════════════════════════════════════════════════════ */
+  suite('description pattern /^\\S(?:.*\\S)?$/');
+
+  assert('valid: "Lunch at cafeteria"',    validate('description', 'Lunch at cafeteria'),  true);
+  assert('valid: single word "Coffee"',    validate('description', 'Coffee'),               true);
+  assert('valid: single char "A"',         validate('description', 'A'),                    true);
+  assert('invalid: leading space " Lunch"', validate('description', ' Lunch'),              false);
+  assert('invalid: trailing space "Lunch "',validate('description', 'Lunch '),              false);
+  assert('invalid: only spaces "   "',     validate('description', '   '),                  false);
+  assert('invalid: empty string',          validate('description', ''),                     false);
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 2 — amount pattern
+  ════════════════════════════════════════════════════════ */
+  suite('amount pattern /^(0|[1-9]\\d*)(\\. \\d{1,2})?$/');
+
+  assert('valid: "0"',          validate('amount', '0'),       true);
+  assert('valid: "12"',         validate('amount', '12'),      true);
+  assert('valid: "9.99"',       validate('amount', '9.99'),    true);
+  assert('valid: "1000.50"',    validate('amount', '1000.50'), true);
+  assert('valid: "0.5"',        validate('amount', '0.5'),     true);
+  assert('invalid: "00"',       validate('amount', '00'),      false);
+  assert('invalid: "1.234"',    validate('amount', '1.234'),   false);
+  assert('invalid: "abc"',      validate('amount', 'abc'),     false);
+  assert('invalid: "-5"',       validate('amount', '-5'),      false);
+  assert('invalid: ".50"',      validate('amount', '.50'),     false);
+  assert('invalid: ""',         validate('amount', ''),        false);
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 3 — nonZeroAmount (advanced lookahead)
+  ════════════════════════════════════════════════════════ */
+  suite('nonZeroAmount — lookahead (?!0(\\.0{1,2})?$)');
+
+  assert('valid: "0.01"',  validate('nonZeroAmount', '0.01'),  true);
+  assert('valid: "1"',     validate('nonZeroAmount', '1'),     true);
+  assert('valid: "100"',   validate('nonZeroAmount', '100'),   true);
+  assert('invalid: "0"',   validate('nonZeroAmount', '0'),     false);
+  assert('invalid: "0.0"', validate('nonZeroAmount', '0.0'),   false);
+  assert('invalid: "0.00"',validate('nonZeroAmount', '0.00'),  false);
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 4 — date pattern
+  ════════════════════════════════════════════════════════ */
+  suite('date pattern — YYYY-MM-DD');
+
+  assert('valid: "2026-02-10"', validate('date', '2026-02-10'), true);
+  assert('valid: "2025-12-31"', validate('date', '2025-12-31'), true);
+  assert('valid: "2026-01-01"', validate('date', '2026-01-01'), true);
+  assert('invalid: "2026-13-01"', validate('date', '2026-13-01'), false);
+  assert('invalid: "2026-00-10"', validate('date', '2026-00-10'), false);
+  assert('invalid: "2026-02-32"', validate('date', '2026-02-32'), false);
+  assert('invalid: "26-02-10"',   validate('date', '26-02-10'),   false);
+  assert('invalid: ""',           validate('date', ''),            false);
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 5 — category pattern
+  ════════════════════════════════════════════════════════ */
+  suite('category pattern — letters, spaces, hyphens');
+
+  assert('valid: "Food"',         validate('category', 'Food'),        true);
+  assert('valid: "Bus-Fare"',     validate('category', 'Bus-Fare'),    true);
+  assert('valid: "Entertainment"',validate('category', 'Entertainment'),true);
+  assert('invalid: "123"',        validate('category', '123'),         false);
+  assert('invalid: "Food123"',    validate('category', 'Food123'),     false);
+  assert('invalid: "  "',         validate('category', '  '),          false);
+  assert('invalid: ""',           validate('category', ''),            false);
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 6 — duplicateWord (advanced back-reference \1)
+  ════════════════════════════════════════════════════════ */
+  suite('duplicateWord — back-reference \\b(\\w+)\\s+\\1\\b');
+
+  assert('matches: "tea tea"',       validate('duplicateWord', 'tea tea'),       true);
+  assert('matches: "good good boy"', validate('duplicateWord', 'good good boy'), true);
+  assert('no match: "bus fare"',     validate('duplicateWord', 'bus fare'),      false);
+  assert('no match: "Coffee"',       validate('duplicateWord', 'Coffee'),        false);
+  assert('no match: "Lunch at cafe"',validate('duplicateWord', 'Lunch at cafe'),  false);
+  assert('case-insensitive: "Tea TEA"',validate('duplicateWord','Tea TEA'),       true);
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 7 — errorMessage helper
+  ════════════════════════════════════════════════════════ */
+  suite('errorMessage() helper');
+
+  assert('no error for valid description', errorMessage('description', 'Lunch'), '');
+  assert('returns string for bad description', typeof errorMessage('description', ''), 'string');
+  assert('no error for valid amount',  errorMessage('amount', '9.99'), '');
+  assert('returns string for bad amount', typeof errorMessage('amount', '-1'), 'string');
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 8 — compileRegex (safe compiler)
+  ════════════════════════════════════════════════════════ */
+  suite('compileRegex() — safe regex compiler');
+
+  assert('returns RegExp for valid pattern',  compileRegex('food') instanceof RegExp, true);
+  assert('returns null for empty string',     compileRegex(''),                       null);
+  assert('returns null for invalid pattern',  compileRegex('[invalid'),               null);
+  assert('case-insensitive by default',       compileRegex('TEA').test('tea'),        true);
+  assert('matches back-ref pattern',
+    compileRegex('\\b(\\w+)\\s+\\1\\b').test('tea tea'),                             true);
+  assert('beverage pattern matches "coffee"', compileRegex('(coffee|tea)').test('coffee'), true);
+  assert('cents pattern matches "12.50"',     compileRegex('\\.\\d{2}\\b').test('12.50'), true);
+
+  /* ════════════════════════════════════════════════════════
+     SUITE 9 — highlight()
+  ════════════════════════════════════════════════════════ */
+  suite('highlight() — wraps matches in <mark>');
+
+  assert('wraps match with mark',
+    highlight('Lunch at cafe', compileRegex('cafe')),
+    'Lunch at <mark>cafe</mark>');
+  assert('no highlight when re is null',
+    highlight('Lunch', null),
+    'Lunch');
+  assert('multiple matches highlighted',
+    highlight('tea and tea', compileRegex('tea')),
+    '<mark>tea</mark> and <mark>tea</mark>');
+
+  /* ════════════════════════════════════════════════════════
+     RENDER
+  ════════════════════════════════════════════════════════ */
+  let totalPass = 0, totalFail = 0;
+  const out = document.getElementById('output');
+
+  results.forEach(suite => {
+    const div = document.createElement('div');
+    div.className = 'suite';
+    div.innerHTML = `<h2 class="suite-title">${suite.name}</h2>`;
+
+    suite.tests.forEach(t => {
+      const cls = t.pass ? 'test--pass' : 'test--fail';
+      const icon = t.pass ? '✓' : '✗';
+      if (t.pass) totalPass++; else totalFail++;
+      div.innerHTML += `
+        <div class="test ${cls}">
+          <span class="icon">${icon}</span>
+          <span class="label">${t.label}</span>
+          <span class="value">→ ${JSON.stringify(t.actual)}</span>
+          ${!t.pass ? `<span class="fail-detail">(expected ${JSON.stringify(t.expected)})</span>` : ''}
+        </div>`;
+    });
+    out.appendChild(div);
+  });
+
+  document.getElementById('passCount').textContent = `✓ ${totalPass} passed`;
+  document.getElementById('failCount').textContent = totalFail ? `✗ ${totalFail} failed` : '';
+  document.getElementById('failCount').style.color = totalFail ? 'var(--fail)' : 'var(--pass)';
+</script>
+</body>
+</html>
