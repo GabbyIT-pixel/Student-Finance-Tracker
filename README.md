@@ -3,7 +3,11 @@
 > A fully accessible, responsive, vanilla HTML/CSS/JS app for tracking student expenses.
 > Built for the Summative Assignment — "Building Responsive UI".
 
-**Live Demo:** [GitHub Pages URL here]
+**Live Demo: https://youtu.be/1OtzvNUg35U?si=nnV2bHHapcOj3XdI
+
+**[GitHub Pages URL herehttps://gabbyit-pixel.github.io/Student-Finance-Tracker/: 
+
+
  **Author:** Gabriel Mugisha · [@GabbyIT-pixel](https://github.com/GabbyIT-pixel)
 
 ---
